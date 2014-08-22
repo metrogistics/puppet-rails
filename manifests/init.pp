@@ -62,7 +62,7 @@ class installgems {
 class myvhost {
   include nginx
 
-  nginx::config { 'myvhost'
+  nginx::config { 'myvhost':
     ensure => present
   }
 }
