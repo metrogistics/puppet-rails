@@ -64,8 +64,8 @@ class setup_rails {
 
   file { $rails_dirs:
       ensure => "directory",
-      owner  => "rails",
-      group  => "rails",
+      owner  => "vagrant",
+      group  => "vagrant",
       mode   => 750,
   }
 }
