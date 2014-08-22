@@ -34,7 +34,7 @@ class requirements {
 
 class installrvm {
   include rvm
-  rvm::system_user { vagrant: ; }
+  rvm::system_user { rails: ; }
 }
 
 class installruby {
@@ -64,8 +64,8 @@ class setup_rails {
 
   file { $rails_dirs:
       ensure => "directory",
-      owner  => "vagrant",
-      group  => "vagrant",
+      owner  => "rails",
+      group  => "rails",
       mode   => 750,
   }
 }
