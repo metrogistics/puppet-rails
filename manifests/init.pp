@@ -43,7 +43,6 @@ class installruby {
         ensure => 'present',
 		default_use => true;
     }
-  rvm_gem { '1.9.3/bundler': ensure => 'present', ;}
 }
 
 class installgems {
