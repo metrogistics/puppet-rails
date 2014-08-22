@@ -59,11 +59,14 @@ class installgems {
 #	}
 }
 
-class myvhost {
-  include nginx
+class setup_rails {
+  $rails_dirs = [ "/var/rails", "/var/rails/shared","/var/rails/shared/log","/var/rails/shared/pids","/var/rails/shared/system", ]
 
-  nginx::config { 'myvhost':
-    ensure => present
+  file { $rails_dirs:
+      ensure => "directory",
+      owner  => "rails",
+      group  => "rails",
+      mode   => 750,
   }
 }
 
@@ -71,6 +74,7 @@ class { requirements: stage => "req-install" }
 class { installrvm: }
 class { installruby: require => Class[Installrvm] }
 class { installgems: require => Class[Installruby] }
+class { setup_rails: }
 class { misc: }
 #class { sqlite: }
 
