@@ -66,6 +66,14 @@ class { installgems: require => Class[Installruby] }
 class { misc: }
 #class { sqlite: }
 
-class { nginx:
-  inlcude nginx
+#class { nginx:
+  #inlcude nginx
+#}
+
+class myvhost {
+  include nginx
+
+  nginx::config { 'myvhost'
+    ensure => present
+  }
 }
