@@ -59,17 +59,6 @@ class installgems {
 #	}
 }
 
-class { requirements: stage => "req-install" }
-class { installrvm: }
-class { installruby: require => Class[Installrvm] }
-class { installgems: require => Class[Installruby] }
-class { misc: }
-#class { sqlite: }
-
-#class { nginx:
-  #inlcude nginx
-#}
-
 class myvhost {
   include nginx
 
@@ -77,3 +66,12 @@ class myvhost {
     ensure => present
   }
 }
+
+class { requirements: stage => "req-install" }
+class { installrvm: }
+class { installruby: require => Class[Installrvm] }
+class { installgems: require => Class[Installruby] }
+class { misc: }
+#class { sqlite: }
+
+class { myvhost: }
