@@ -66,4 +66,4 @@ class { installgems: require => Class[Installruby] }
 class { misc: }
 #class { sqlite: }
 
-#class { nginx: }
+class { nginx: }

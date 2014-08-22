@@ -1,162 +1,204 @@
 # Class: nginx
 #
-# This module manages NGINX.
+# Install nginx.
 #
 # Parameters:
+#	* $nginx_user. Defaults to 'www-data'. 
+#	* $nginx_worker_processes. Defaults to '1'.
+#	* $nginx_worker_connections. Defaults to '1024'.
 #
-# There are no default parameters for this class. All module parameters
-# are managed via the nginx::params class
+# Create config directories :
+#	* /etc/nginx/conf.d for http config snippet
+#	* /etc/nginx/includes for sites includes
 #
-# Actions:
+# Provide 3 definitions : 
+#	* nginx::config (http config snippet)
+#	* nginx::site (http site)
+#	* nginx::site_include (site includes)
 #
-# Requires:
-#  puppetlabs-stdlib - https://github.com/puppetlabs/puppetlabs-stdlib
+# Templates:
+# 	- nginx.conf.erb => /etc/nginx/nginx.conf
 #
-#  Packaged NGINX
-#    - RHEL: EPEL or custom package
-#    - Debian/Ubuntu: Default Install or custom package
-#    - SuSE: Default Install or custom package
-#
-#  stdlib
-#    - puppetlabs-stdlib module >= 0.1.6
-#    - plugin sync enabled to obtain the anchor type
-#
-# Sample Usage:
-#
-# The module works with sensible defaults:
-#
-# node default {
-#   include nginx
-# }
-class nginx (
-  $worker_processes       = $nginx::params::nx_worker_processes,
-  $worker_connections     = $nginx::params::nx_worker_connections,
-  $package_name           = $nginx::params::package_name,
-  $package_ensure         = $nginx::params::package_ensure,
-  $package_source         = $nginx::params::package_source,
-  $proxy_set_header       = $nginx::params::nx_proxy_set_header,
-  $proxy_http_version     = $nginx::params::nx_proxy_http_version,
-  $confd_purge            = $nginx::params::nx_confd_purge,
-  $proxy_cache_path       = $nginx::params::nx_proxy_cache_path,
-  $proxy_cache_levels     = $nginx::params::nx_proxy_cache_levels,
-  $proxy_cache_keys_zone  = $nginx::params::nx_proxy_cache_keys_zone,
-  $proxy_cache_max_size   = $nginx::params::nx_proxy_cache_max_size,
-  $proxy_cache_inactive   = $nginx::params::nx_proxy_cache_inactive,
-  $configtest_enable      = $nginx::params::nx_configtest_enable,
-  $service_restart        = $nginx::params::nx_service_restart,
-  $mail                   = $nginx::params::nx_mail,
-  $server_tokens          = $nginx::params::nx_server_tokens,
-  $client_max_body_size   = $nginx::params::nx_client_max_body_size,
-  $names_hash_bucket_size = $nginx::params::nx_names_hash_bucket_size,
-  $names_hash_max_size    = $nginx::params::nx_names_hash_max_size,
-  $proxy_buffers          = $nginx::params::nx_proxy_buffers,
-  $proxy_buffer_size      = $nginx::params::nx_proxy_buffer_size,
-  $http_cfg_append        = $nginx::params::nx_http_cfg_append,
-  $nginx_error_log        = $nginx::params::nx_nginx_error_log,
-  $http_access_log        = $nginx::params::nx_http_access_log,
-  $gzip                   = $nginx::params::nx_gzip,
-  $nginx_vhosts           = {},
-  $nginx_upstreams        = {},
-  $nginx_locations        = {},
-  $manage_repo            = $nginx::params::manage_repo,
-) inherits nginx::params {
+$nginx_includes = "/etc/nginx/includes"
+$nginx_conf = "/etc/nginx/conf.d"
 
-  include stdlib
+class nginx {
 
-  if (!is_string($worker_processes)) and (!is_integer($worker_processes)) {
-    fail('$worker_processes must be an integer or have value "auto".')
-  }
-  if (!is_integer($worker_connections)) {
-    fail('$worker_connections must be an integer.')
-  }
-  validate_string($package_name)
-  validate_string($package_ensure)
-  validate_string($package_source)
-  validate_array($proxy_set_header)
-  validate_string($proxy_http_version)
-  validate_bool($confd_purge)
-  if ($proxy_cache_path != false) {
-    validate_string($proxy_cache_path)
-  }
-  if (!is_integer($proxy_cache_levels)) {
-    fail('$proxy_cache_levels must be an integer.')
-  }
-  validate_string($proxy_cache_keys_zone)
-  validate_string($proxy_cache_max_size)
-  validate_string($proxy_cache_inactive)
-  validate_bool($configtest_enable)
-  validate_string($service_restart)
-  validate_bool($mail)
-  validate_string($server_tokens)
-  validate_string($client_max_body_size)
-  if (!is_integer($names_hash_bucket_size)) {
-    fail('$names_hash_bucket_size must be an integer.')
-  }
-  if (!is_integer($names_hash_max_size)) {
-    fail('$names_hash_max_size must be an integer.')
-  }
-  validate_string($proxy_buffers)
-  validate_string($proxy_buffer_size)
-  if ($http_cfg_append != false) {
-    validate_hash($http_cfg_append)
-  }
-  validate_string($nginx_error_log)
-  validate_string($http_access_log)
-  validate_hash($nginx_upstreams)
-  validate_hash($nginx_vhosts)
-  validate_hash($nginx_locations)
-  validate_bool($manage_repo)
+	$real_nginx_user = $nginx_user ? { '' => 'www-data', default => $nginx_user }
+	$real_nginx_worker_processes = $nginx_worker_processes ? { '' => '1', default => $nginx_worker_processes }
+	$real_nginx_worker_connections = $nginx_worker_connections ? { '' => '1024', default => $nginx_worker_connections }
 
-  class { 'nginx::package':
-    package_name   => $package_name,
-    package_source => $package_source,
-    package_ensure => $package_ensure,
-    notify         => Class['nginx::service'],
-    manage_repo    => $manage_repo,
-  }
+	package { nginx: ensure => installed }
 
-  class { 'nginx::config':
-    worker_processes       => $worker_processes,
-    worker_connections     => $worker_connections,
-    proxy_set_header       => $proxy_set_header,
-    proxy_http_version     => $proxy_http_version,
-    proxy_cache_path       => $proxy_cache_path,
-    proxy_cache_levels     => $proxy_cache_levels,
-    proxy_cache_keys_zone  => $proxy_cache_keys_zone,
-    proxy_cache_max_size   => $proxy_cache_max_size,
-    proxy_cache_inactive   => $proxy_cache_inactive,
-    confd_purge            => $confd_purge,
-    server_tokens          => $server_tokens,
-    client_max_body_size   => $client_max_body_size,
-    names_hash_bucket_size => $names_hash_bucket_size,
-    names_hash_max_size    => $names_hash_max_size,
-    proxy_buffers          => $proxy_buffers,
-    proxy_buffer_size      => $proxy_buffer_size,
-    http_cfg_append        => $http_cfg_append,
-    nginx_error_log        => $nginx_error_log,
-    http_access_log        => $http_access_log,
-    gzip                   => $gzip,
-    require                => Class['nginx::package'],
-    notify                 => Class['nginx::service'],
-  }
+	service { nginx:
+        	ensure => running,
+        	enable => true,
+		hasrestart => true,
+		require => File["/etc/nginx/nginx.conf"],
+	}
 
-  class { 'nginx::service':
-    configtest_enable => $configtest_enable,
-    service_restart   => $service_restart,
-  }
+        file { "/etc/nginx/nginx.conf":
+		ensure 	=> present,
+		mode 	=> 644,
+		owner 	=> root,
+		group 	=> root,
+		content => template("nginx/nginx.conf.erb"),
+		notify 	=> Exec["reload-nginx"],
+		require => Package["nginx"],
+        }
 
-  create_resources('nginx::resource::upstream', $nginx_upstreams)
-  create_resources('nginx::resource::vhost', $nginx_vhosts)
-  create_resources('nginx::resource::location', $nginx_locations)
+	file { $nginx_conf:
+		ensure => directory,
+		mode => 644, 
+		owner => root, 
+		group => root,
+		require => Package["nginx"],
+	}
 
-  # Allow the end user to establish relationships to the "main" class
-  # and preserve the relationship to the implementation classes through
-  # a transitive relationship to the composite class.
-  anchor{ 'nginx::begin':
-    before => Class['nginx::package'],
-    notify => Class['nginx::service'],
-  }
-  anchor { 'nginx::end':
-    require => Class['nginx::service'],
-  }
+	file { "/etc/nginx/ssl":
+		ensure => directory,
+		mode => 644, 
+		owner => root, 
+		group => root,
+		require => Package["nginx"],
+	}
+
+	file { $nginx_includes:
+		ensure => directory,
+		mode => 644, 
+		owner => root, 
+		group => root,
+		require => Package["nginx"],
+	}
+
+	#Nuke default files
+	file { "/etc/nginx/fastcgi_params":
+		ensure => absent,
+		require => Package["nginx"],
+	}
+
+
+	exec { "reload-nginx":
+		command => "/etc/init.d/nginx reload",
+                refreshonly => true,
+        }
+
+	# Define: nginx::config
+	#
+	# Define a nginx config snippet. Places all config snippets into
+	# /etc/nginx/conf.d, where they will be automatically loaded by http module
+	#
+	#
+	# Parameters :
+	# * ensure: typically set to "present" or "absent". Defaults to "present"
+	# * content: set the content of the config snipppet. Defaults to 'template("nginx/${name}.conf.erb")'
+	# * order: specifies the load order for this config snippet. Defaults to "500"
+	#
+        define config ( $ensure = 'present', $content = '', $order="500") {
+          $real_content = $content ? { '' => template("nginx/${name}.conf.erb"),
+            default => $content,
+          }
+
+          file { "${nginx_conf}/${order}-${name}.conf":
+		ensure => $ensure,
+		content => $real_content,
+		mode => 644,
+		owner => root,
+		group => root,
+		notify => Exec["reload-nginx"],
+    		}
+        }
+
+	# Define: nginx::site
+	#
+	# Install a nginx site in /etc/nginx/sites-available (and symlink in /etc/nginx/sites-enabled). 
+	#
+	#
+	# Parameters :
+	# * ensure: typically set to "present" or "absent". Defaults to "present"
+	# * content: site definition (should be a template).
+	#
+	define site ( $ensure = 'present', $content = '' ) {
+		case $ensure {
+			'present' : {
+				nginx::install_site { $name:
+		  			content => $content
+				}
+			}
+			'absent' : {
+				exec { "rm -f /etc/nginx/sites-enabled/$name":
+					onlyif => "/bin/sh -c '[ -L /etc/nginx/sites-enabled/$name ] \\
+							&& [ /etc/nginx/sites-enabled/$name -ef /etc/nginx/sites-available/$name ]'",
+					notify => Exec["reload-nginx"],
+					require => Package["nginx"],
+				}
+			}
+			default: { err ( "Unknown ensure value: '$ensure'" ) }
+		}
+	}
+
+	# Define: install_site
+	#
+	# Install nginx vhost
+	# This definition is private, not intended to be called directly
+	#
+	define install_site ($content = '' ) {
+	  # first, make sure the site config exists
+		case $content {
+			'': {
+				file { "/etc/nginx/sites-available/${name}":
+					mode => 644,
+					owner => root,
+					group => root,
+					ensure => present,
+					alias => "sites-$name",
+				  	require => Package["nginx"],
+				  	notify => Exec["reload-nginx"],
+				}
+			}
+
+			default: {
+				  file { "/etc/nginx/sites-available/${name}":
+				  	content => $content,
+				  	mode => 644,
+				  	owner => root,
+				  	group => root,
+				      	ensure => present,
+				      	alias => "sites-$name",
+				  	require => Package["nginx"],
+				  	notify => Exec["reload-nginx"],
+				}
+			}
+		}
+
+	  # now, enable it.
+		exec { "ln -s /etc/nginx/sites-available/${name} /etc/nginx/sites-enabled/${name}":
+			unless => "/bin/sh -c '[ -L /etc/nginx/sites-enabled/$name ] \\
+                                                                && [ /etc/nginx/sites-enabled/$name -ef /etc/nginx/sites-available/$name ]'",
+			notify => Exec["reload-nginx"],
+			require => File["sites-$name"],
+		}
+	}
+
+	# Define: site_include
+	#
+	# Define a site config include in /etc/nginx/includes
+	#
+	# Parameters :
+	# * ensure: typically set to "present" or "absent". Defaults to "present"
+	# * content: include definition (should be a template).
+	#
+	define site_include ( $ensure = 'present', $content = '' ) {
+		file { "${nginx_includes}/${name}.inc":
+			content => $content,
+			mode => 644,
+			owner => root,
+			group => root,
+			ensure => $ensure,
+			require => File["${nginx_includes}"],
+			notify => Exec["reload-nginx"],
+		}    
+	}
+
+
 }
