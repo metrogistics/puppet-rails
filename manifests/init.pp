@@ -34,7 +34,7 @@ class requirements {
 
 class installrvm {
   include rvm
-  rvm::system_user { rails: ; }
+  rvm::system_user { rails-app: ; }
 }
 
 class installruby {
@@ -64,8 +64,8 @@ class setup_rails {
 
   file { $rails_dirs:
       ensure => "directory",
-      owner  => "rails",
-      group  => "rails",
+      owner  => "rails-app",
+      group  => "rails-app",
       mode   => 750,
   }
 }
