@@ -66,7 +66,7 @@ class setup_rails {
       ensure => "directory",
       owner  => "rails-app",
       group  => "rails-app",
-      mode   => 750,
+      mode   => 755,
   }
 }
 
