@@ -47,9 +47,9 @@ class installruby {
 
 class installgems {
 
-  #rvm_gem { '1.9.3/bundler': ensure => 'present', ;}
+  rvm_gem { '1.9.3/bundler': ensure => 'present', ;}
 
- rvm_gem { '1.9.3/rails': ensure => 'present', ; }
+  #rvm_gem { '1.9.3/rails': ensure => 'present', ; }
 
 
 #	rvm_gemset {
