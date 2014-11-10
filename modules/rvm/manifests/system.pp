@@ -15,6 +15,15 @@ class rvm::system($version=undef) {
     creates => '/usr/local/rvm/bin/rvm',
     require => [
       Class['rvm::dependencies'],
+      Exec['install-gpg']
+    ],
+  }
+
+  exec { 'install-gpg':
+    path    => '/usr/bin:/usr/sbin:/bin',
+    command => "/usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg --import -",
+    require => [
+      Class['rvm::dependencies'],
     ],
   }
 
