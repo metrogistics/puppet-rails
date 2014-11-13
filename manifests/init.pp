@@ -12,12 +12,12 @@ class misc {
 	package { 'libmysqlclient-dev': ensure => installed }
   package {'libfontconfig1': 	ensure => installed 	}
 
-	exec { "install-wkhtmltopdf":
-		command => "curl -s -o /tmp/wkhtmltopdf-0.9.9-static-i386.tar.bz2 https://wkhtmltopdf.googlecode.com/files/wkhtmltopdf-0.9.9-static-i386.tar.bz2 \
-					&& tar xvjf /tmp/wkhtmltopdf-0.9.9-static-i386.tar.bz2 -C /tmp \
-					&& sudo mv /tmp/wkhtmltopdf-i386 /usr/local/bin/wkhtmltopdf",
-		creates => "/usr/local/bin/wkhtmltopdf",
-	}
+	# exec { "install-wkhtmltopdf":
+	# 	command => "curl -s -o /tmp/wkhtmltopdf-0.9.9-static-i386.tar.bz2 https://wkhtmltopdf.googlecode.com/files/wkhtmltopdf-0.9.9-static-i386.tar.bz2 \
+	# 				&& tar xvjf /tmp/wkhtmltopdf-0.9.9-static-i386.tar.bz2 -C /tmp \
+	# 				&& sudo mv /tmp/wkhtmltopdf-i386 /usr/local/bin/wkhtmltopdf",
+	# 	creates => "/usr/local/bin/wkhtmltopdf",
+	# }
 
 	# ExecJS runtime.
 	package { 'nodejs':  ensure => installed 	}
